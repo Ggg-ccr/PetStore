@@ -10,12 +10,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 关键：旧Gradle3.5必须用JDK8，不能用11
+      # 旧Gradle3.5强制使用JDK8
       - name: Setup JDK 8
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 8
+
+      - name: 替换build.gradle为国内镜像，加速依赖下载
+        run: |
+          sed -i 's|jcenter()|maven { url "https://maven.aliyun.com/repository/public" }|g' build.gradle
+          sed -i 's|google()|maven { url "https://dl.aliyuncs.com/android/android" }\ngoogle()|g' build.gradle
 
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
