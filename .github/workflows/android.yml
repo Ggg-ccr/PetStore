@@ -16,15 +16,22 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      # 项目在根目录，直接给当前目录gradlew权限
-      - name: Add execute permission to gradlew
+      # 赋予gradlew执行权限
+      - name: Add execute permission
         run: chmod +x ./gradlew
 
-      # 不需要切换子目录，直接在根目录编译
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      # 替换阿里云Maven镜像，解决海外依赖超时
+      - name: Replace maven mirror
+        run: |
+          sed -i 's|google()|maven { url "https://dl.aliyuncs.com/android/android" }\ngoogle()|g' build.gradle
+          sed -i 's|mavenCentral()|maven { url "https://maven.aliyun.com/repository/public" }\nmavenCentral()|g' build.gradle
+          sed -i '1i maven { url "https://developer.huawei.com/repo/" }' build.gradle
 
-      # APK输出路径改为根目录下app文件夹
+      # 编译Debug包
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      # 上传APK产物
       - name: Upload built APK
         uses: actions/upload-artifact@v4
         with:
