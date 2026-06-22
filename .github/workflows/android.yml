@@ -2,23 +2,31 @@ name: Android Build
 on:
   push:
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 11
-      - name: Grant execute permission
-        run: chmod +x HMSPetStoreApp/gradlew
-      - name: Build APK
-        working-directory: ./HMSPetStoreApp
+
+      # 项目在根目录，直接给当前目录gradlew权限
+      - name: Add execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      # 不需要切换子目录，直接在根目录编译
+      - name: Build Debug APK
         run: ./gradlew assembleDebug
-      - name: Upload APK Artifact
+
+      # APK输出路径改为根目录下app文件夹
+      - name: Upload built APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: HMSPetStoreApp/app/build/outputs/apk/debug/*.apk
+          name: PetStore-Debug-APK
+          path: app/build/outputs/apk/debug/*.apk
