@@ -1,0 +1,37 @@
+name: Android Build
+
+# 推送代码自动构建 + 支持页面手动点击运行
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 拉取仓库全部代码
+    - uses: actions/checkout@v3
+
+    # 配置JDK11
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 11
+
+    # 给gradlew添加执行权限
+    - name: Grant execute permission
+      run: chmod +x HMSPetStoreApp/gradlew
+
+    # 进入安卓项目目录编译调试APK
+    - name: Build APK
+      working-directory: ./HMSPetStoreApp
+      run: ./gradlew assembleDebug
+
+    # 上传编译好的APK，构建完成可下载
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: HMSPetStoreApp/app/build/outputs/apk/debug/*.apk
